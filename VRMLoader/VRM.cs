@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using VRMLoader.Utility;
@@ -19,6 +20,23 @@ namespace VRMLoader
 			builder.AppendFormat("  generator  : {0}", generator).AppendLine();
 			builder.AppendFormat("  version    : {0}", version).AppendLine();
 			builder.AppendFormat("  minVersion : {0}", minVersion);
+			return builder.ToString();
+		}
+	}
+	struct VRMScene {
+		public string name;
+		public int[] nodes;
+
+		public override string ToString()
+		{
+			StringBuilder builder = new StringBuilder();
+			builder.AppendFormat("  name      : {0}", name);
+			int i = 0;
+			foreach (int n in nodes) {
+				builder.AppendLine();
+				builder.AppendFormat("  node #{0:000} : {1}", i, n);
+				i++;
+			}
 			return builder.ToString();
 		}
 	}
@@ -82,19 +100,53 @@ namespace VRMLoader
 					// version
 					if (asset.ContainsKey("version")) {
 						vrm.asset.version = asset.Value<String>("version");
+					} else {
+						vrm.asset.version = "";
 					}
 					// copyright
 					if (asset.ContainsKey("copyright")) {
 						vrm.asset.copyright = asset.Value<String>("copyright");
+					} else {
+						vrm.asset.copyright = "";
 					}
 					// generator
 					if (asset.ContainsKey("generator")) {
 						vrm.asset.generator = asset.Value<String>("generator");
+					} else {
+						vrm.asset.generator = "";
 					}
 					// minVersion
 					if (asset.ContainsKey("minVersion")) {
 						vrm.asset.minVersion = asset.Value<String>("minVersion");
+					} else {
+						vrm.asset.minVersion = "";
 					}
+				}
+
+				// scenes
+				if (root.ContainsKey("scenes")) {
+					JArray scenes = root.Value<JArray>("scenes");
+					vrm.scenes = new VRMScene[scenes.Count];
+					for(int i = 0; i < scenes.Count; i++) {
+						JObject scene = scenes.Value<JObject>(i);
+						vrm.scenes[i] = new VRMScene();
+						if (scene.ContainsKey("name")) {
+							vrm.scenes[i].name = scene.Value<string>("name");
+						} else {
+							vrm.scenes[i].name = "";
+						}
+						if (scene.ContainsKey("nodes")) {
+							JArray nodes = scene.Value<JArray>("nodes");
+							vrm.scenes[i].nodes = new int[nodes.Count];
+							for (int j = 0; j < nodes.Count; j++) {
+								vrm.scenes[i].nodes[j] = nodes.Value<int>(j);
+							}
+						} else {
+							vrm.scenes[i].nodes = (int[])Enumerable.Empty<int>();
+						}
+					}
+				} else {
+					vrm.scenes = (VRMScene[])Enumerable.Empty<VRMScene>();
 				}
 			} else {
 				throw new InvalidDataException("This JSON file does not contain a value.");
@@ -107,6 +159,7 @@ namespace VRMLoader
 		Chunk jsonChunk;
 
 		VRMAsset asset;
+		VRMScene[] scenes;
 
 		#if DEBUG
 		public void Print() {
@@ -120,6 +173,15 @@ namespace VRMLoader
 			DebugLog.WriteLine();
 			DebugLog.WriteLine("*** VRM Asset ***");
 			DebugLog.WriteLine(asset.ToString());
+			DebugLog.WriteLine();
+			DebugLog.WriteLine("*** VRM Scene ***");
+			int i = 0;
+			foreach(var scene in scenes) {
+				DebugLog.WriteLine(string.Format("Scene #{0:000}", i));
+				DebugLog.WriteLine(scene.ToString());
+				i++;
+			}
+			DebugLog.WriteLine();
 
 			DebugLog.End();
 		}
@@ -132,6 +194,15 @@ namespace VRMLoader
 			Console.WriteLine();
 			Console.WriteLine("** Asset **");
 			Console.WriteLine(asset.ToString());
+			Console.WriteLine();
+			Console.WriteLine("*** VRM Scene ***");
+			int i = 0;
+			foreach(var scene in scenes) {
+				Console.WriteLine(string.Format("Scene #{0:000}", i));
+				Console.WriteLine(scene.ToString());
+				i++;
+			}
+			Console.WriteLine();
 		}
 		#endif
 	}
