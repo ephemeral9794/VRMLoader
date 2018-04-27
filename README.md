@@ -2,8 +2,10 @@
 
 ## VRMとは
 --[dwango on GitHub/VRM](https://dwango.github.io/vrm/)より引用--
+
 「VRM」はVRアプリケーション向けの人型3Dアバター（3Dモデル）データを扱うためのファイルフォーマットです。
 [glTF2.0](https://www.khronos.org/gltf/)をベースとしており、誰でも自由に利用することができます。
+
 --引用終わり--
 
 ## VRMLoaderについて
