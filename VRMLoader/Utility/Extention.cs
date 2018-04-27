@@ -4,7 +4,7 @@ using System.Text;
 
 namespace VRMLoader.Utility
 {
-	public static class Util
+	public static class Extention
 	{
 		public static T[] FillArray<T>(T[] array, T n) {
 			for (int i = 0; i < array.Length; i++) {

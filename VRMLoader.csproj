@@ -49,7 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VRMLoader\Utility\DebugLog.cs" />
     <Compile Include="VRMLoader\Utility\EndianStream.cs" />
-    <Compile Include="VRMLoader\Utility\Util.cs" />
+    <Compile Include="VRMLoader\Utility\Extention.cs" />
     <Compile Include="VRMLoader\VRM.cs" />
   </ItemGroup>
   <ItemGroup>
