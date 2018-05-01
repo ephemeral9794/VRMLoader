@@ -21,4 +21,5 @@ VRMLoaderは自作VRM Viewerのための自作ライブラリです。
 ## Special Thanks
 * [glTF Homepage](https://www.khronos.org/gltf/)
 * [glTF 2.0 Specification](https://github.com/KhronosGroup/glTF/)
+* [dwango on GitHub](https://dwango.github.io/)
 * [glTF-loader](https://github.com/Lugdunum3D/glTF2-loader)
