@@ -51,6 +51,8 @@
     <Compile Include="VRMLoader\Utility\EndianStream.cs" />
     <Compile Include="VRMLoader\Utility\Extention.cs" />
     <Compile Include="VRMLoader\VRM.cs" />
+    <Compile Include="VRMLoader\VRMException.cs" />
+    <Compile Include="VRMLoader\VRMLoader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

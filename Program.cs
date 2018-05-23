@@ -9,9 +9,9 @@ class Program
 		try {
 			string file = "C:\\Users\\Administrator\\Desktop\\Alicia\\VRM\\AliciaSolid.vrm";
 			using (Stream stream = File.Open(file, FileMode.Open)) {
-				VRM vrm = VRM.Load(stream);
+				VRM vrm = Loader.Load(stream);
 				if (vrm != null) {
-					vrm.Print();
+					Loader.Print(vrm);
 				}
 			}
 		} catch (Exception e) {

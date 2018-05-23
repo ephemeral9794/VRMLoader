@@ -1,13 +1,9 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Collections.Generic;
-using static System.Math;
 using Newtonsoft.Json.Linq;
-using VRMLoader.Utility;
+using System.Linq;
 using static VRMLoader.GLenum;
-
 
 namespace VRMLoader
 {
@@ -49,19 +45,63 @@ namespace VRMLoader
 		GL_QUADS = 0x0007,
 		GL_QUAD_STRIP = 0x0008,
 		GL_POLYGON = 0x0009,
+
+		/* BufferTarget */
+		GL_ARRAY_BUFFER = 0x8892,
+		GL_ELEMENT_ARRAY_BUFFER = 0x8893,
+
+		None = -1,
 	};
 
-	class VRMAsset {
-		public string copyright;
-		public string generator;
-		public string version;
-		public string minVersion;
+	public struct VRMAsset {
+		private string copyright;
+		private string generator;
+		private string version;
+		private string minVersion;
 
-		public VRMAsset() {
-			copyright = "";
-			generator = "";
-			version = "";
-			minVersion = "";
+		// property
+		public string Copyright {
+			get { return copyright; }
+			set { copyright = value; }
+		}
+		public string Generator {
+			get { return generator; }
+			set { generator = value; }
+		}
+		public string Version {
+			get { return version; }
+			set { version = value; }
+		}
+		public string MinVersion {
+			get { return minVersion; }
+			set { minVersion = value; }
+		}
+
+		public VRMAsset(JObject obj) {
+			// version
+			if (obj.ContainsKey("version")) {
+				version = (string)obj["version"];
+			} else {
+				version = "";
+			}
+			// copyright
+			if (obj.ContainsKey("copyright")) {
+				copyright = (string)obj["copyright"];
+			} else {
+				copyright = "";
+			}
+			// generator
+			if (obj.ContainsKey("generator")) {
+				generator = (string)obj["generator"];
+			} else {
+				generator = "";
+			}
+			// minVersion
+			if (obj.ContainsKey("minVersion")) {
+				minVersion = (string)obj["minVersion"];
+			} else {
+				minVersion = "";
+			}
 		}
 
 		public override string ToString()
@@ -74,9 +114,214 @@ namespace VRMLoader
 			return builder.ToString();
 		}
 	}
-	struct VRMScene {
-		public string name;
-		public int[] nodes;
+	public struct VRMBuffer {
+		public uint byteLength;
+		public byte[] data;
+		
+		public uint ByteLength {
+			get { return byteLength; }
+			set { byteLength = value; }
+		}
+		public byte[] Data {
+			get { return data; }
+			set { data = value; }
+		}
+
+		public VRMBuffer(JObject obj) {
+			// byteLength
+			if (obj.ContainsKey("byteLength")) {
+				byteLength = (uint)obj["byteLength"];
+			} else {
+				byteLength = 0;
+			}
+			data = new byte[0];
+		}
+
+		public override string ToString()
+		{
+			StringBuilder builder = new StringBuilder();
+			builder.AppendFormat("  byteLength  : {0}", byteLength).AppendLine();
+			builder.AppendFormat("  data.Length : {0}", data.Length);
+			return builder.ToString();
+		}
+	}
+	public struct VRMBufferView {
+		private uint buffer; // Index to the buffer
+		private uint byteOffset;
+		private uint byteLength;
+		private uint byteStride; // The stride, in bytes
+		private GLenum target;
+		
+		public uint Buffer {
+			get { return buffer; }
+			set { buffer = value; }
+		}
+		public uint ByteOffset {
+			get { return byteOffset; }
+			set { byteOffset = value; }
+		}
+		public uint ByteLength {
+			get { return byteLength; }
+			set { byteLength = value; }
+		}
+		public uint ByteStride {
+			get { return byteStride; }
+			set { byteStride = value; }
+		}
+		public GLenum Target {
+			get { return target; }
+			set { target = value; }
+		}
+
+		public VRMBufferView(JObject obj) {
+			// buffer
+			if (obj.ContainsKey("buffer")) {
+				buffer = (uint)obj["buffer"];
+			} else {
+				buffer = 0;
+			}
+			// byteOffset
+			if (obj.ContainsKey("byteOffset")) {
+				byteOffset = (uint)obj["byteOffset"];
+			} else {
+				byteOffset = 0;
+			}
+			// byteLength
+			if (obj.ContainsKey("byteLength")) {
+				byteLength = (uint)obj["byteLength"];
+			} else {
+				byteLength = 0;
+			}
+			// byteStride
+			if (obj.ContainsKey("byteStride")) {
+				byteStride = (uint)obj["byteStride"];
+			} else {
+				byteStride = 0;
+			}
+			// target
+			if (obj.ContainsKey("target")) {
+				int t = (int)obj["target"];
+				target = (GLenum)t;
+			} else {
+				target = None;
+			}
+		}
+
+		public override string ToString()
+		{
+			StringBuilder builder = new StringBuilder();
+			builder.AppendFormat("  buffer     : {0}", buffer).AppendLine();
+			builder.AppendFormat("  byteOffset : {0}", byteOffset).AppendLine();
+			builder.AppendFormat("  byteLength : {0}", byteLength).AppendLine();
+			builder.AppendFormat("  byteStride : {0}", byteStride).AppendLine();
+			builder.AppendFormat("  target     : {0}", Enum.GetName(target.GetType(), target));
+			return builder.ToString();
+		}
+	}
+	public struct VRMAccessor {
+		private int bufferView;
+		private uint byteOffset;
+		private GLenum componentType;
+		private uint count;
+		private string type;
+
+		public int BufferView {
+			get { return bufferView; }
+			set { bufferView = value; }
+		}
+		public uint ByteOffset {
+			get { return byteOffset; }
+			set { byteOffset = value; }
+		}
+		public GLenum ComponentType {
+			get { return componentType; }
+			set { componentType = value; }
+		}
+		public uint Count {
+			get { return count; }
+			set { count = value; }
+		}
+		public string Type {
+			get { return type; }
+			set { type = value; }
+		}
+
+		public VRMAccessor(JObject obj) {
+			// bufferView
+			if (obj.ContainsKey("bufferView")) {
+				bufferView = (int)obj["bufferView"];
+			} else {
+				bufferView = -1;
+			}
+			// byteOffset
+			if (obj.ContainsKey("byteOffset")) {
+				byteOffset = (uint)obj["byteOffset"];
+			} else {
+				byteOffset = 0;
+			}
+			// componentType
+			if (obj.ContainsKey("componentType")) {
+				int c = (int)obj["byteOffset"];
+				componentType = (GLenum)c;
+			} else {
+				componentType = None;
+			}
+			// count
+			if (obj.ContainsKey("count")) {
+				count = (uint)obj["count"];
+			} else {
+				count = 0;
+			}
+			// type
+			if (obj.ContainsKey("type")) {
+				type = (string)obj["type"];				
+			} else {
+				type = "";
+			}
+		}
+
+		public override string ToString()
+		{
+			StringBuilder builder = new StringBuilder();
+			builder.AppendFormat("  bufferView    : {0}", bufferView).AppendLine();
+			builder.AppendFormat("  byteOffset    : {0}", byteOffset).AppendLine();
+			builder.AppendFormat("  componentType : {0}", Enum.GetName(componentType.GetType(), componentType)).AppendLine();
+			builder.AppendFormat("  count         : {0}", count).AppendLine();
+			builder.AppendFormat("  type          : {0}", type);
+			return builder.ToString();
+		}
+	}
+	public struct VRMScene {
+		private string name;
+		private int[] nodes;
+
+		public string Name {
+			get { return name; }
+			set { name = value; }
+		}
+		public int[] Nodes {
+			get { return nodes; }
+			set { nodes = value; }
+		}
+
+		public VRMScene(JObject obj) {
+			// name
+			if (obj.ContainsKey("name")) {
+				name = (string)obj["name"];
+			} else {
+				name = "";
+			}
+			// nodes
+			if (obj.ContainsKey("nodes")) {
+				JArray node = (JArray)obj["nodes"];
+				nodes = new int[node.Count];
+				for (int j = 0; j < node.Count; j++) {
+					nodes[j] = (int)node[j];
+				}
+			} else {
+				nodes = (int[])Enumerable.Empty<int>();
+			}
+		}
 
 		public override string ToString()
 		{
@@ -91,82 +336,148 @@ namespace VRMLoader
 			return builder.ToString();
 		}
 	}
-	struct VRMPrimitive {
-		public int indices;
-		public int material;
-		//public int mode;
-		public GLenum mode;
-		public Dictionary<string, int> attributes;
-		public Dictionary<string, int>[] targets;
+	public struct VRMNode {
+		private string name;
+		private int camera;
+		private int mesh;
+		private int skin;
+		private List<int> children;
+		private double[] matrix;		// 16
+		private double[] rotation;	// 4
+		private double[] scale;		// 3
+		private double[] translation;	// 3
+		private List<double> weights;
 
-		public override string ToString()
-		{
-			StringBuilder builder = new StringBuilder();
-			builder.AppendFormat("    indices  : {0}", indices).AppendLine();
-			builder.AppendFormat("    material : {0}", material).AppendLine();
-			builder.AppendFormat("    mode     : {0}", Enum.GetName(mode.GetType(), mode));
-			foreach (var at in attributes) {
-				builder.AppendLine();
-				builder.AppendFormat("    attributes {0} : {1}", at.Key, at.Value);
+		public string Name {
+			get { return name; }
+			set { name = value; }
+		}
+		public int Camera {
+			get { return camera; }
+			set { camera = value; }
+		}
+		public int Mesh {
+			get { return mesh; }
+			set { mesh = value; }
+		}
+		public int Skin {
+			get { return skin; }
+			set { skin = value; }
+		}
+		public List<int> Children {
+			get { return children; }
+			set { children = value; }
+		}
+		public double[] Matrix {
+			get { return matrix; }
+			set { matrix = value; }
+		}
+		public double[] Translation {
+			get { return translation; }
+			set { translation = value; }
+		}
+		public double[] Rotation {
+			get { return rotation; }
+			set { rotation = value; }
+		}
+		public double[] Scale {
+			get { return scale; }
+			set { scale = value; }
+		}
+		public List<double> Weights {
+			get { return weights; }
+			set { weights = value; }
+		}
+
+		public VRMNode(JObject obj) {
+			// name
+			if (obj.ContainsKey("name")) {
+				name = (string)obj["name"];
+			} else {
+				name = "";
 			}
-			for (int i = 0; i < targets.Length; i++) {
-				builder.AppendLine();
-				builder.AppendFormat("    targets #{0:000}", i);
-				foreach (var at in targets[i]) {
-					builder.AppendLine();
-					builder.AppendFormat("      {0} : {1}", at.Key, at.Value);
+			// camera
+			if (obj.ContainsKey("camera")) {
+				camera = (int)obj["camera"];
+			} else {
+				camera = -1;
+			}
+			// children
+			children = new List<int>();
+			if (obj.ContainsKey("children")) {
+				JArray child = (JArray)obj["children"];
+				foreach (var c in child) {
+					children.Add((int)c);
 				}
 			}
-			return builder.ToString();
-		}
-	}
-	struct VRMMesh {
-		public string name;
-		public float[] weights;
-		public VRMPrimitive[] primitives;
-
-		public override string ToString()
-		{
-			StringBuilder builder = new StringBuilder();
-			builder.AppendFormat("  name      : {0}", name);
-			for (int i = 0; i < weights.Length; i++) {
-				builder.AppendLine();
-				builder.AppendFormat("  weight #{0:000} : {1}", i, weights[i]);
+			// skin
+			if (obj.ContainsKey("skin")) {
+				skin = (int)obj["skin"];
+			} else {
+				skin = -1;
 			}
-			for (int i = 0; i < primitives.Length; i++) {
-				builder.AppendLine();
-				builder.AppendFormat("  primitive #{0:000}", i).AppendLine();
-				builder.AppendFormat("{0}", primitives[i].ToString());
+			// mesh
+			if (obj.ContainsKey("mesh")) {
+				mesh = (int)obj["mesh"];
+			} else {
+				mesh = -1;
 			}
-			return builder.ToString();
-		}
-	}
-	class VRMNode {
-		public string name;
-		public int camera;
-		public int mesh;
-		public int skin;
-		public int[] children;
-		public double[] matrix;		// 16
-		public double[] rotation;	// 4
-		public double[] scale;		// 3
-		public double[] translation;	// 3
-		public double[] weights;
-
-		public VRMNode() {
-			name = "";
-			camera = -1;
-			mesh = -1;
-			skin = -1;
-			matrix = new [] {
-				1.0, 0.0, 0.0, 0.0,
-				0.0, 1.0, 0.0, 0.0,
-				0.0, 0.0, 1.0, 0.0,
-				0.0, 0.0, 0.0, 1.0,
-			};
-			rotation = new [] { 0.0, 0.0, 0.0, 1.0 };
-			scale = new [] { 1.0, 1.0, 1.0 };
-			translation = new [] { 0.0, 0.0, 0.0 };
+			// matrix
+			if (obj.ContainsKey("matrix")) {
+				JArray mat = (JArray)obj["matrix"];
+				matrix = new double[mat.Count];
+				for (int j = 0; j < mat.Count; j++) {
+					matrix[j] = (double)mat[j];
+				}
+				translation = new double[] { 0.0, 0.0, 0.0 };
+				rotation = new double[] { 0.0, 0.0, 0.0, 1.0 };
+				scale = new double[] { 1.0, 1.0, 1.0 };
+			} else {
+				matrix = new double[] {
+					1.0, 0.0, 0.0, 0.0,
+					0.0, 1.0, 0.0, 0.0,
+					0.0, 0.0, 1.0, 0.0,
+					0.0, 0.0, 0.0, 1.0
+				};
+				// translation
+				if (obj.ContainsKey("translation")) {
+					JArray trans = (JArray)obj["translation"];
+					translation = new double[trans.Count];
+					for (int j = 0; j < trans.Count; j++) {
+						translation[j] = (double)trans[j];
+					}
+				} else {
+					translation = new double[] { 0.0, 0.0, 0.0 };
+				}
+				// rotation
+				if (obj.ContainsKey("rotation")) {
+					JArray rotate = (JArray)obj["rotation"];
+					rotation = new double[rotate.Count];
+					for (int j = 0; j < rotate.Count; j++) {
+						rotation[j] = (double)rotate[j];
+					}
+				} else {
+					rotation = new double[] { 0.0, 0.0, 0.0, 1.0 };
+				}
+				// scale
+				if (obj.ContainsKey("scale")) {
+					JArray sc = (JArray)obj["scale"];
+					scale = new double[sc.Count];
+					for (int j = 0; j < sc.Count; j++) {
+						scale[j] = (double)sc[j];
+					}
+				} else {
+					scale = new double[] { 1.0, 1.0, 1.0 };
+				}
+			}
+			// weights
+			weights = new List<double>();
+			if (obj.ContainsKey("weights")) {
+				JArray weight = (JArray)obj["weights"];
+				foreach (var w in weight) {
+					weights.Add((double)w);
+				}
+			}
 		}
 
 		public override string ToString()
@@ -176,7 +487,7 @@ namespace VRMLoader
 			builder.AppendFormat("  camera           : {0}", camera).AppendLine();
 			builder.AppendFormat("  mesh             : {0}", mesh).AppendLine();
 			builder.AppendFormat("  skin             : {0}", skin);
-			for (int i = 0; i < children.Length; i++) {
+			for (int i = 0; i < children.Count; i++) {
 				builder.AppendLine();
 				builder.AppendFormat("  children #{0:000}    : {1}", i, children[i]);
 			}
@@ -199,642 +510,173 @@ namespace VRMLoader
 			return builder.ToString();
 		}
 	}
-	struct VRMBuffer {
-		public string name;
-		public uint byteLength;
-		public byte[] data;
+	public struct VRMPrimitive {
+		public int indices;
+		public int material;
+		//public int mode;
+		public GLenum mode;
+		public Dictionary<string, int> attributes;
+		public List<Dictionary<string, int>> targets;
+
+		public VRMPrimitive(JObject obj) {
+			// indices
+			if (obj.ContainsKey("indices")) {
+				indices = (int)obj["indices"];
+			} else {
+				indices = -1;
+			}
+			// material
+			if (obj.ContainsKey("material")) {
+				material = (int)obj["material"];
+			} else {
+				material = -1;
+			}
+			// mode
+			if (obj.ContainsKey("mode")) {
+				int m = (int)obj["mode"];
+				mode = (GLenum)m;
+			} else {
+				mode = GL_TRIANGLES;
+			}
+			// attributes
+			attributes = new Dictionary<string, int>();
+			if (obj.ContainsKey("attributes")) {
+				JObject attribute = (JObject)obj["attributes"];
+				foreach (var at in attribute) {
+					if (at.Value.Type == JTokenType.Integer) {
+						attributes.Add(at.Key, (int)at.Value);
+					}
+				}
+			}
+			// targets
+			targets = new List<Dictionary<string, int>>();
+			if (obj.ContainsKey("targets")) {
+				JArray tg = (JArray)obj["targets"];
+				foreach (JObject t in tg) {
+					Dictionary<string, int> target = new Dictionary<string, int>();
+					foreach(var at in t) {
+						if (at.Value.Type == JTokenType.Integer) {
+							target.Add(at.Key, (int)(at.Value));
+						}
+					}
+					targets.Add(target);
+				}
+			}
+		}
 
 		public override string ToString()
 		{
 			StringBuilder builder = new StringBuilder();
-			builder.AppendFormat("  name        : {0}", name).AppendLine();
-			builder.AppendFormat("  byteLength  : {0}", byteLength).AppendLine();
-			builder.AppendFormat("  data.Length : {0}", data.Length);
+			builder.AppendFormat("    indices  : {0}", indices).AppendLine();
+			builder.AppendFormat("    material : {0}", material).AppendLine();
+			builder.AppendFormat("    mode     : {0}", Enum.GetName(mode.GetType(), mode));
+			foreach (var at in attributes) {
+				builder.AppendLine();
+				builder.AppendFormat("    attributes {0} : {1}", at.Key, at.Value);
+			}
+			for (int i = 0; i < targets.Count; i++) {
+				builder.AppendLine();
+				builder.AppendFormat("    targets #{0:000}", i);
+				foreach (var at in targets[i]) {
+					builder.AppendLine();
+					builder.AppendFormat("      {0} : {1}", at.Key, at.Value);
+				}
+			}
 			return builder.ToString();
 		}
 	}
-	struct VRMAccessor {
-		public enum Type {
-			Scalar,
-			Vec2,
-			Vec3,
-			Vec4,
-			Mat2,
-			Mat3,
-			Mat4
-		}
+	public struct VRMMesh {
 		public string name;
-		public int bufferView;
-		public uint byteOffset;
-		public GLenum componentType;
-		public bool normalized;
-		public uint count;
-		public Type type;
+		public List<double> weights;
+		public List<VRMPrimitive> primitives;
+
+		public VRMMesh(JObject obj) {
+			// name
+			if (obj.ContainsKey("name")) {
+				name = (string)obj["name"];
+			} else {
+				name = "";
+			}
+			// weights
+			weights = new List<double>();
+			if (obj.ContainsKey("weights")) {
+				JArray weight = (JArray)obj["weights"];
+				for (int j = 0; j < weight.Count; j++) {
+					weights.Add((double)weight[j]);
+				}
+			}
+			// primitives
+			JArray primitive = (JArray)obj["primitives"];
+			primitives = new List<VRMPrimitive>();
+			foreach (JObject p in primitive) {
+				primitives.Add(new VRMPrimitive(p));
+			}
+		}
 
 		public override string ToString()
 		{
 			StringBuilder builder = new StringBuilder();
-			builder.AppendFormat("  name          : {0}", name).AppendLine();
-			builder.AppendFormat("  bufferView    : {0}", bufferView).AppendLine();
-			builder.AppendFormat("  byteOffset    : {0}", byteOffset).AppendLine();
-			builder.AppendFormat("  componentType : {0}", Enum.GetName(componentType.GetType(), componentType)).AppendLine();
-			builder.AppendFormat("  normalized    : {0}", normalized).AppendLine();
-			builder.AppendFormat("  count         : {0}", count).AppendLine();
-			builder.AppendFormat("  type          : {0}", Enum.GetName(type.GetType(), type));
-			return builder.ToString();
-		}
-	}
-	struct VRMBufferView {
-		public enum TargetType {
-			None = 0,
-			ArrayBuffer = 34962,
-			ElementArrayBuffer = 34963,
-		}
-		public string name;
-		public uint buffer; // Index to the buffer
-		public uint byteOffset;
-		public uint byteLength;
-		public uint byteStride; // The stride, in bytes
-		public TargetType target;
-
-		public override string ToString()
-		{
-			StringBuilder builder = new StringBuilder();
-			builder.AppendFormat("  name       : {0}", name).AppendLine();
-			builder.AppendFormat("  buffer     : {0}", buffer).AppendLine();
-			builder.AppendFormat("  byteOffset : {0}", byteOffset).AppendLine();
-			builder.AppendFormat("  byteLength : {0}", byteLength).AppendLine();
-			builder.AppendFormat("  byteStride : {0}", byteStride).AppendLine();
-			builder.AppendFormat("  target     : {0}", Enum.GetName(target.GetType(), target));
+			builder.AppendFormat("  name      : {0}", name);
+			for (int i = 0; i < weights.Count; i++) {
+				builder.AppendLine();
+				builder.AppendFormat("  weight #{0:000} : {1}", i, weights[i]);
+			}
+			for (int i = 0; i < primitives.Count; i++) {
+				builder.AppendLine();
+				builder.AppendFormat("  primitive #{0:000}", i).AppendLine();
+				builder.AppendFormat("{0}", primitives[i].ToString());
+			}
 			return builder.ToString();
 		}
 	}
 
 	public class VRM
 	{
-		struct Header {
-			public uint magic;
-			public uint version;
-			public uint length;
-
-			public static Header Load(EndianStream stream) {
-				Header header;
-				header.magic = stream.ReadUInt32();
-				header.version = stream.ReadUInt32();
-				header.length = stream.ReadUInt32();
-				return header;
-			}
-			public bool Check() {
-				return (magic == 0x46546C67);
-			}
-			public override string ToString() {
-				return string.Format("[magic:{0} version:{1} length:{2}]", Extention.ReverseUIntToString(magic), version, length);
-			}
-		}
-		struct Chunk {
-			public uint length;
-			public uint type;
-			public byte[] data;
-
-			public static Chunk Load(EndianStream stream) {
-				Chunk chunk;
-				chunk.length = stream.ReadUInt32();
-				chunk.type = stream.ReadUInt32();
-				chunk.data = stream.ReadBytes((int)chunk.length);
-				return chunk;
-			}
-			public override string ToString() {
-				return string.Format("[length:{0}, type:{1}]", length, Extention.ReverseUIntToString(type));
-			}
-		}
-
-		public static VRM Load(Stream s) {
-			VRM vrm = new VRM();
-			EndianStream stream = new EndianStream(s, Endian.LITTLE_ENDIAN);
-			vrm.header = Header.Load(stream);
-			if (!vrm.header.Check()) {	// 'glTF'
-				throw new FormatException("This file is not The VRM(glTF) file.");
-			}
-			vrm.jsonChunk = Chunk.Load(stream);
-			if (vrm.jsonChunk.type != 0x4E4F534A) {	// 'JSON'
-				throw new InvalidDataException("The JSON chunk must follow the header");
-			}
-			
-			// Parse JSON
-			JObject root = JObject.Parse(Encoding.UTF8.GetString(vrm.jsonChunk.data));
-			if (root.HasValues) {
-				// asset
-				if (root.ContainsKey("asset")) {
-					JObject asset = (JObject)root["asset"];
-					vrm.asset = new VRMAsset();
-					// version
-					if (asset.ContainsKey("version")) {
-						vrm.asset.version = (string)asset["version"];
-					} else {
-						vrm.asset.version = "";
-					}
-					// copyright
-					if (asset.ContainsKey("copyright")) {
-						vrm.asset.copyright = (string)asset["copyright"];
-					} else {
-						vrm.asset.copyright = "";
-					}
-					// generator
-					if (asset.ContainsKey("generator")) {
-						vrm.asset.generator = (string)asset["generator"];
-					} else {
-						vrm.asset.generator = "";
-					}
-					// minVersion
-					if (asset.ContainsKey("minVersion")) {
-						vrm.asset.minVersion = (string)asset["minVersion"];
-					} else {
-						vrm.asset.minVersion = "";
-					}
-				}
-
-				// scenes
-				if (root.ContainsKey("scenes")) {
-					JArray scenes = (JArray)root["scenes"];
-					vrm.scenes = new VRMScene[scenes.Count];
-
-					for(int i = 0; i < scenes.Count; i++) {
-						JObject scene = (JObject)scenes[i];
-						vrm.scenes[i] = new VRMScene();
-
-						// name
-						if (scene.ContainsKey("name")) {
-							vrm.scenes[i].name = (string)scene["name"];
-						} else {
-							vrm.scenes[i].name = "";
-						}
-
-						// nodes
-						if (scene.ContainsKey("nodes")) {
-							JArray nodes = (JArray)scene["nodes"];
-							vrm.scenes[i].nodes = new int[nodes.Count];
-							for (int j = 0; j < nodes.Count; j++) {
-								vrm.scenes[i].nodes[j] = (int)nodes[j];
-							}
-						} else {
-							vrm.scenes[i].nodes = (int[])Enumerable.Empty<int>();
-						}
-					}
-				} else {
-					vrm.scenes = (VRMScene[])Enumerable.Empty<VRMScene>();
-				}
-
-				// meshes
-				if (root.ContainsKey("meshes")) {
-					JArray meshes = (JArray)root["meshes"];
-					vrm.meshes = new VRMMesh[meshes.Count];
-
-					for (int i = 0; i < meshes.Count; i++) {
-						JObject mesh = (JObject)meshes[i];
-						vrm.meshes[i] = new VRMMesh();
-
-						// name
-						if (mesh.ContainsKey("name")) {
-							vrm.meshes[i].name = (string)mesh["name"];
-						} else {
-							vrm.meshes[i].name = "";
-						}
-
-						// weights
-						if (mesh.ContainsKey("weights")) {
-							JArray weights = (JArray)mesh["weights"];
-							vrm.meshes[i].weights = new float[weights.Count];
-							for (int j = 0; j < weights.Count; j++) {
-								vrm.meshes[i].weights[j] = (float)weights[j];
-							}
-						} else {
-							vrm.meshes[i].weights = (float[])Enumerable.Empty<float>();
-						}
-
-						// primitives
-						JArray primitives = (JArray)mesh["primitives"];
-						vrm.meshes[i].primitives = new VRMPrimitive[primitives.Count];
-						for (int j = 0; j < primitives.Count; j++) {
-							JObject primitive = (JObject)primitives[j];
-
-							// indices
-							if (primitive.ContainsKey("indices")) {
-								vrm.meshes[i].primitives[j].indices = (int)primitive["indices"];
-							} else {
-								vrm.meshes[i].primitives[j].indices = -1;
-							}
-
-							// material
-							if (primitive.ContainsKey("material")) {
-								vrm.meshes[i].primitives[j].material = (int)primitive["material"];
-							} else {
-								vrm.meshes[i].primitives[j].material = -1;
-							}
-
-							// mode
-							if (primitive.ContainsKey("mode")) {
-								int mode = (int)primitive["mode"];
-								vrm.meshes[i].primitives[j].mode = (GLenum)mode;
-							} else {
-								vrm.meshes[i].primitives[j].mode = GL_TRIANGLES;
-							}
-
-							// attributes
-							if (primitive.ContainsKey("attributes")) {
-								JObject attributes = (JObject)primitive["attributes"];
-								vrm.meshes[i].primitives[j].attributes = new Dictionary<string, int>();
-								foreach (var at in attributes) {
-									if (at.Value.Type == JTokenType.Integer) {
-										vrm.meshes[i].primitives[j].attributes.Add(at.Key, (int)at.Value);
-									}
-								}
-							} else {
-								vrm.meshes[i].primitives[j].attributes = new Dictionary<string, int>();
-							}
-
-							// targets
-							if (primitive.ContainsKey("targets")) {
-								JArray targets = (JArray)primitive["targets"];
-								vrm.meshes[i].primitives[j].targets = new Dictionary<string, int>[targets.Count];
-								for (int n = 0; n < targets.Count; n++) {
-									JObject target = (JObject)targets[n];
-									vrm.meshes[i].primitives[j].targets[n] = new Dictionary<string, int>();
-									foreach(var t in target) {
-										if (t.Value.Type == JTokenType.Integer) {
-											vrm.meshes[i].primitives[j].targets[n].Add(t.Key, (int)(t.Value));
-										}
-									}
-								}
-							} else {
-								vrm.meshes[i].primitives[j].targets = (Dictionary<string, int>[])Enumerable.Empty<Dictionary<string, int>>();
-							}
-						}
-					}
-				} else {
-					vrm.meshes = (VRMMesh[])Enumerable.Empty<VRMMesh>();
-				}
-
-				// nodes
-				if (root.ContainsKey("nodes")) {
-					JArray nodes = (JArray)root["nodes"];
-					vrm.nodes = new VRMNode[nodes.Count];
-
-					for (int i = 0; i < nodes.Count; i++) {
-						JObject node = (JObject)nodes[i];
-						vrm.nodes[i] = new VRMNode();
-
-						// name
-						if (node.ContainsKey("name")) {
-							vrm.nodes[i].name = (string)node["name"];
-						} else {
-							vrm.nodes[i].name = "";
-						}
-
-						// camera
-						if (node.ContainsKey("camera")) {
-							vrm.nodes[i].camera = (int)node["camera"];
-						} else {
-							vrm.nodes[i].camera = -1;
-						}
-
-						// children
-						if (node.ContainsKey("children")) {
-							JArray children = (JArray)node["children"];
-							vrm.nodes[i].children = new int[children.Count];
-							for (int j = 0; j < children.Count; j++) {
-								vrm.nodes[i].children[j] = (int)children[j];
-							}
-						} else {
-							vrm.nodes[i].children = (int[])Enumerable.Empty<int>();
-						}
-
-						// skin
-						if (node.ContainsKey("skin")) {
-							vrm.nodes[i].skin = (int)node["skin"];
-						} else {
-							vrm.nodes[i].skin = -1;
-						}
-
-						// mesh
-						if (node.ContainsKey("mesh")) {
-							vrm.nodes[i].mesh = (int)node["mesh"];
-						} else {
-							vrm.nodes[i].mesh = -1;
-						}
-
-						// matrix
-						if (node.ContainsKey("matrix")) {
-							JArray matrix = (JArray)node["matrix"];
-							for (int j = 0; j < matrix.Count; j++) {
-								vrm.nodes[i].matrix[j] = (double)matrix[j];
-							}
-						} else {
-							// translation
-							if (node.ContainsKey("translation")) {
-								JArray translation = (JArray)node["translation"];
-								for (int j = 0; j < translation.Count; j++) {
-									vrm.nodes[i].translation[j] = (double)translation[j];
-								}
-							}
-							// rotation
-							if (node.ContainsKey("rotation")) {
-								JArray rotation = (JArray)node["rotation"];
-								for (int j = 0; j < rotation.Count; j++) {
-									vrm.nodes[i].rotation[j] = (double)rotation[j];
-								}
-							}
-							// scale
-							if (node.ContainsKey("scale")) {
-								JArray scale = (JArray)node["scale"];
-								for (int j = 0; j < scale.Count; j++) {
-									vrm.nodes[i].scale[j] = (double)scale[j];
-								}
-							}
-						}
-
-						// weights
-						if (node.ContainsKey("weights")) {
-							JArray weights = (JArray)node["weights"];
-							vrm.nodes[i].weights = new double[weights.Count];
-							for (int j = 0; j < weights.Count; j++) {
-								vrm.nodes[i].weights[j] = (double)weights[j];
-							}
-						} else {
-							vrm.nodes[i].weights = (double[])Enumerable.Empty<double>();
-						}
-					}
-				} else {
-					vrm.nodes = (VRMNode[])Enumerable.Empty<VRMNode>();
-				}
-
-				// buffers
-				if (root.ContainsKey("buffers")) {
-					JArray buffers = (JArray)root["buffers"];
-					vrm.buffers = new VRMBuffer[buffers.Count];
-					for (int i = 0; i < buffers.Count; i++) {
-						JObject buffer = (JObject)buffers[i];
-						vrm.buffers[i] = new VRMBuffer();
-						Chunk bin = Chunk.Load(stream);
-						/*if (bin.type != 0x204E4942) {	// 'BIN '
-							throw new InvalidDataException("This BIN chunk is broken.");
-						}*/
-
-						// name
-						if (buffer.ContainsKey("name")) {
-							vrm.buffers[i].name = (string)buffer["name"];
-						} else {
-							vrm.buffers[i].name = "";
-						}
-						
-						// byteLength
-						if (buffer.ContainsKey("byteLength")) {
-							vrm.buffers[i].byteLength = (uint)buffer["byteLength"];
-						} else {
-							vrm.buffers[i].byteLength = 0;
-						}
-
-						vrm.buffers[i].data = new byte[bin.length];
-						Array.Copy(bin.data, vrm.buffers[i].data, bin.length);
-					}
-				} else {
-					vrm.buffers = (VRMBuffer[])Enumerable.Empty<VRMBuffer>();
-				}
-
-				// accessors
-				if (root.ContainsKey("accessors")) {
-					JArray accessors = (JArray)root["accessors"];
-					vrm.accessors = new VRMAccessor[accessors.Count];
-					for (int i = 0; i < accessors.Count; i++) {
-						JObject accessor = (JObject)accessors[i];
-						vrm.accessors[i] = new VRMAccessor();
-						
-						// name
-						if (accessor.ContainsKey("name")) {
-							vrm.accessors[i].name = (string)accessor["name"];
-						} else {
-							vrm.accessors[i].name = "";
-						}
-						
-						// bufferView
-						if (accessor.ContainsKey("bufferView")) {
-							vrm.accessors[i].bufferView = (int)accessor["bufferView"];
-						} else {
-							vrm.accessors[i].bufferView = -1;
-						}
-
-						// byteOffset
-						if (accessor.ContainsKey("byteOffset")) {
-							vrm.accessors[i].byteOffset = (uint)accessor["byteOffset"];
-						} else {
-							vrm.accessors[i].byteOffset = 0;
-						}
-
-						// componentType
-						if (accessor.ContainsKey("componentType")) {
-							int componentType = (int)accessor["byteOffset"];
-							vrm.accessors[i].componentType = (GLenum)componentType;
-						} else {
-							vrm.accessors[i].componentType = GL_FLOAT;
-						}
-
-						// normalized
-						if (accessor.ContainsKey("normalized")) {
-							vrm.accessors[i].normalized = (bool)accessor["normalized"];
-						} else {
-							vrm.accessors[i].normalized = false;
-						}
-
-						// count
-						if (accessor.ContainsKey("count")) {
-							vrm.accessors[i].count = (uint)accessor["count"];
-						} else {
-							vrm.accessors[i].count = 0;
-						}
-
-						// type
-						if (accessor.ContainsKey("type")) {
-							string type = (string)accessor["type"];
-							if (type == "SCALAR") {
-								vrm.accessors[i].type = VRMAccessor.Type.Scalar;
-							} else if (type == "VEC2") {
-								vrm.accessors[i].type = VRMAccessor.Type.Vec2;
-							} else if (type == "VEC3") {
-								vrm.accessors[i].type = VRMAccessor.Type.Vec3;
-							} else if (type == "VEC4") {
-								vrm.accessors[i].type = VRMAccessor.Type.Vec4;
-							} else if (type == "MAT2") {
-								vrm.accessors[i].type = VRMAccessor.Type.Mat2;
-							} else if (type == "MAT3") {
-								vrm.accessors[i].type = VRMAccessor.Type.Mat3;
-							} else if (type == "MAT4") {
-								vrm.accessors[i].type = VRMAccessor.Type.Mat4;
-							} else {
-								throw new FormatException("accessors[i][type] is not a valid type");
-							}
-						} else {
-							throw new FormatException("accessors[i][type] is not a valid type");
-						}
-					}
-				} else {
-					vrm.accessors = (VRMAccessor[])Enumerable.Empty<VRMAccessor>();
-				}
-
-				if (root.ContainsKey("bufferViews")) {
-					JArray bufferViews = (JArray)root["bufferViews"];
-					vrm.bufferViews = new VRMBufferView[bufferViews.Count];
-					for (int i = 0; i < bufferViews.Count; i++) {
-						JObject bufferView = (JObject)bufferViews[i];
-						vrm.bufferViews[i] = new VRMBufferView();
-						
-						// name
-						if (bufferView.ContainsKey("name")) {
-							vrm.bufferViews[i].name = (string)bufferView["name"];
-						} else {
-							vrm.bufferViews[i].name = "";
-						}
-						
-						// buffer
-						if (bufferView.ContainsKey("buffer")) {
-							vrm.bufferViews[i].buffer = (uint)bufferView["buffer"];
-						} else {
-							vrm.bufferViews[i].buffer = 0;
-						}
-
-						// byteOffset
-						if (bufferView.ContainsKey("byteOffset")) {
-							vrm.bufferViews[i].byteOffset = (uint)bufferView["byteOffset"];
-						} else {
-							vrm.bufferViews[i].byteOffset = 0;
-						}
-
-						// byteLength
-						if (bufferView.ContainsKey("byteLength")) {
-							vrm.bufferViews[i].byteLength = (uint)bufferView["byteLength"];
-						} else {
-							vrm.bufferViews[i].byteLength = 0;
-						}
-
-						// byteStride
-						if (bufferView.ContainsKey("byteStride")) {
-							vrm.bufferViews[i].byteStride = (uint)bufferView["byteStride"];
-						} else {
-							vrm.bufferViews[i].byteStride = 0;
-						}
-
-						// target
-						if (bufferView.ContainsKey("target")) {
-							int target = (int)bufferView["target"];
-							vrm.bufferViews[i].target = (VRMBufferView.TargetType)target;
-						} else {
-							vrm.bufferViews[i].target = VRMBufferView.TargetType.None;
-						}
-					}
-				} else {
-					vrm.bufferViews = (VRMBufferView[])Enumerable.Empty<VRMBufferView>();
-				}
-			} else {
-				throw new InvalidDataException("This JSON data does not contain a value.");
-			}
-
-			return vrm;
-		}
-
-		Header header;
-		Chunk jsonChunk;
-
 		VRMAsset asset;
-		VRMScene[] scenes;
-		VRMMesh[] meshes;
-		VRMNode[] nodes;
-		VRMBuffer[] buffers;
-		VRMAccessor[] accessors;
-		VRMBufferView[] bufferViews;
+		List<VRMBuffer> buffers;
+		List<VRMBufferView> bufferViews;
+		List<VRMAccessor> accessors;
+		List<VRMScene> scenes;
+		List<VRMNode> nodes;
+		List<VRMMesh> meshes;
 
-		#if DEBUG
-		public void Print() {
-			DebugLog.Start();
-			DebugLog.Visible = true;
-
-			DebugLog.WriteLine("-- VRM Header --");
-			DebugLog.WriteLine(header.ToString());
-			DebugLog.WriteLine("-- VRM JSON Chunk --");
-			DebugLog.WriteLine(jsonChunk.ToString());
-			DebugLog.WriteLine();
-			DebugLog.WriteLine("*** VRM Asset ***");
-			DebugLog.WriteLine(asset.ToString());
-			DebugLog.WriteLine();
-			DebugLog.WriteLine("*** VRM Scene ***");
-			int i = 0;
-			foreach(var scene in scenes) {
-				DebugLog.WriteLine(string.Format("Scene #{0:000}", i));
-				DebugLog.WriteLine(scene.ToString());
-				i++;
-			}
-			DebugLog.WriteLine();
-			i = 0;
-			foreach(var mesh in meshes) {
-				DebugLog.WriteLine(string.Format("Mesh #{0:000}", i));
-				DebugLog.WriteLine(mesh.ToString());
-				i++;
-			}
-			DebugLog.WriteLine();
-			i = 0;
-			foreach(var node in nodes) {
-				DebugLog.WriteLine(string.Format("Node #{0:000}", i));
-				DebugLog.WriteLine(node.ToString());
-				i++;
-			}
-			DebugLog.WriteLine();
-			i = 0;
-			foreach(var buffer in buffers) {
-				DebugLog.WriteLine(string.Format("Buffer #{0:000}", i));
-				DebugLog.WriteLine(buffer.ToString());
-				i++;
-			}
-			DebugLog.WriteLine();
-			i = 0;
-			foreach(var accessor in accessors) {
-				DebugLog.WriteLine(string.Format("Accessor #{0:000}", i));
-				DebugLog.WriteLine(accessor.ToString());
-				i++;
-			}
-			DebugLog.WriteLine();
-			i = 0;
-			foreach(var bufferView in bufferViews) {
-				DebugLog.WriteLine(string.Format("BufferView #{0:000}", i));
-				DebugLog.WriteLine(bufferView.ToString());
-				i++;
-			}
-			DebugLog.WriteLine();
-
-			DebugLog.End();
+		public VRMAsset Asset {
+			get { return asset; }
+			set { asset = value; }
 		}
-		#else 
-		public void Print() {
-			Console.WriteLine("-- VRM Header --");
-			Console.WriteLine(header.ToString());
-			Console.WriteLine("-- VRM JSON Chunk --");
-			Console.WriteLine(jsonChunk.ToString());
-			Console.WriteLine();
-			Console.WriteLine("** Asset **");
-			Console.WriteLine(asset.ToString());
-			Console.WriteLine();
-			Console.WriteLine("*** VRM Scene ***");
-			int i = 0;
-			foreach(var scene in scenes) {
-				Console.WriteLine(string.Format("Scene #{0:000}", i));
-				Console.WriteLine(scene.ToString());
-				i++;
-			}
-			Console.WriteLine();
-			i = 0;
-			foreach(var mesh in meshes) {
-				Console.WriteLine(string.Format("Mesh #{0:000}", i));
-				Console.WriteLine(mesh.ToString());
-				i++;
-			}
-			Console.WriteLine();
+		public List<VRMBuffer> Buffers {
+			get { return buffers; }
+			set { buffers = value; }
 		}
-		#endif
+		public List<VRMBufferView> BufferViews {
+			get { return bufferViews; }
+			set { bufferViews = value; }
+		}
+		public List<VRMAccessor> Accessors {
+			get { return accessors; }
+			set { accessors = value; }
+		}
+		public List<VRMScene> Scenes {
+			get { return scenes; }
+			set { scenes = value; }
+		}
+		public List<VRMNode> Nodes {
+			get { return nodes; }
+			set { nodes = value; }
+		}
+		public List<VRMMesh> Meshes {
+			get { return meshes; }
+			set { meshes = value; }
+		}
+
+		public VRM() {
+			scenes = new List<VRMScene>();
+			buffers = new List<VRMBuffer>();
+			bufferViews = new List<VRMBufferView>();
+			accessors = new List<VRMAccessor>();
+			scenes = new List<VRMScene>();
+			nodes = new List<VRMNode>();
+			meshes = new List<VRMMesh>();
+		}
 	}
 }
