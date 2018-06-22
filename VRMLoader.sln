@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VRMLoader", "VRMLoader.csproj", "{33D5EADB-2706-4F00-A48D-5D4E940341EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VRMLoader", "VRMLoader\VRMLoader.csproj", "{8F2EA1FF-A316-4117-BBF7-DD274FBF1C9F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VRMLoaderTest", "VRMLoaderTest\VRMLoaderTest.csproj", "{9E0FE57E-C364-4CE5-A761-0042840178C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +13,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{33D5EADB-2706-4F00-A48D-5D4E940341EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{33D5EADB-2706-4F00-A48D-5D4E940341EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{33D5EADB-2706-4F00-A48D-5D4E940341EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{33D5EADB-2706-4F00-A48D-5D4E940341EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F2EA1FF-A316-4117-BBF7-DD274FBF1C9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F2EA1FF-A316-4117-BBF7-DD274FBF1C9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F2EA1FF-A316-4117-BBF7-DD274FBF1C9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F2EA1FF-A316-4117-BBF7-DD274FBF1C9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E0FE57E-C364-4CE5-A761-0042840178C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E0FE57E-C364-4CE5-A761-0042840178C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E0FE57E-C364-4CE5-A761-0042840178C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E0FE57E-C364-4CE5-A761-0042840178C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {BB1E5B75-26F9-4F2B-930B-508C014581DC}
+		SolutionGuid = {B7C0ECB3-B0E5-48D8-8439-95883BFC24D3}
 	EndGlobalSection
 EndGlobal
