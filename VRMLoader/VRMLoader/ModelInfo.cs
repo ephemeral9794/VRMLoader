@@ -51,7 +51,7 @@ namespace VRMLoader
 	}
 	
 	[DataContract]
-	public class Vector3 
+	public class VRMVector3 
 	{
 		[DataMember(Name = "x")]
 		public float X { get; set; }
@@ -189,7 +189,7 @@ namespace VRMLoader
 		public int FirstPersonBone { get; set; }
 
 		[DataMember(Name = "firstPersonBoneOffset")]
-		public Vector3 FirstPersonBoneOffset { get; set; }
+		public VRMVector3 FirstPersonBoneOffset { get; set; }
 
 		[DataMember(Name = "meshAnnotations")]
 		public MeshAnnotation[] MeshAnnotations { get; set; }
@@ -293,7 +293,7 @@ namespace VRMLoader
 		public int GravityPower { get; set; }
 		
 		[DataMember(Name = "gravityDir")]
-		public Vector3 GravityDir { get; set; }
+		public VRMVector3 GravityDir { get; set; }
 		
 		[DataMember(Name = "dragForce")]
 		public float DragForce { get; set; }
@@ -325,7 +325,7 @@ namespace VRMLoader
 	public class Collider
 	{
 		[DataMember(Name = "offset")]
-		public Vector3 Offset { get; set; }
+		public VRMVector3 Offset { get; set; }
 
 		[DataMember(Name = "radius")]
 		public float Radius { get; set; }
