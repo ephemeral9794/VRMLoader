@@ -393,11 +393,17 @@ namespace VRMLoader
 	[DataContract]
 	public class Asset
 	{
+		[DataMember(Name = "copyright")]
+		public string Copyright { get; set; }
+
 		[DataMember(Name = "generator")]
 		public string Generator { get; set; }
 
 		[DataMember(Name = "version")]
 		public string Version { get; set; }
+
+		[DataMember(Name = "minVersion")]
+		public string MinVersion  { get; set; }
 	}
 
 	[DataContract]
@@ -551,7 +557,8 @@ namespace VRMLoader
 		public int Indices { get; set; }
 		
 		[DataMember(Name = "attributes")]
-		public Attributes Attributes { get; set; }
+		//public Attributes Attributes { get; set; }
+		public Dictionary<string, int> Attributes { get; set; }
 		
 		[DataMember(Name = "material")]
 		public int Material { get; set; }
@@ -560,7 +567,7 @@ namespace VRMLoader
 		public Target[] Targets { get; set; }
 	}
 
-	[DataContract]
+	/*[DataContract]
 	public class Attributes
 	{
 		[DataMember(Name = "POSITION")]
@@ -580,7 +587,7 @@ namespace VRMLoader
 		
 		[DataMember(Name = "WEIGHTS_0")]
 		public int WEIGHTS_0 { get; set; }
-	}
+	}*/
 
 	[DataContract]
 	public class Target

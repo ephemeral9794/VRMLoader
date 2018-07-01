@@ -15,6 +15,7 @@ namespace VRMLoaderTest
 					Console.WriteLine($"Load Model File ({file}).");
 					Model model = Loader.Load(stream);
 					//Loader.Print(vrm);
+					Loader.PrintModelInfo(model.Info);
 					Console.WriteLine($"Output Model Info JSON.");
 					string json = Loader.SerializeModelInfo(model.Info);
 					using (var output = File.CreateText("model.json")) {
